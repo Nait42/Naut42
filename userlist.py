@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 ListOfUsers = []
-true = True
+isRunning = True
 num = 0
 el = 0
 
@@ -18,7 +18,7 @@ class User:
         print("Пользователь №", el + 1, "-", self.name, "| Возраст:", self.age, '.')
 
 
-while true:
+while isRunning:
     print("Для добавления пользователя нажмите клавишу 'enter', для остановки введите 's' ")
     i = input()
     if i != "s":
@@ -38,7 +38,7 @@ while true:
         except ValueError:
             print("ОШИБКА! - Возраст необходимо ввести в формате числа, используя цифры.")
     else:
-        true = False
+        isRunning = False
         print("Завершаем добавление новых пользователей.\n" )
 
 print("Количество пользователей в списке:", len(ListOfUsers), "\n")
