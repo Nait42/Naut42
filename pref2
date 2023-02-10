@@ -1,0 +1,255 @@
+classlist = ['пропуск нуля']
+GamesValue = {6: 2, 7: 4, 8: 6, 9: 8, 10: 10, 0: 10}
+GamesVist = {6: 4, 7: 3, 8: 2, 9: 1, 10: 1}
+GamesVistTakes = {6: 2, 7: 1, 8: 1, 9: 1, 10: 1}
+
+
+#класс игроков
+class Player:
+    name = ""
+    gora = 0
+    pulya = 0
+    VistLeft = 0
+    VistRight = 0
+    VistLeftNumber = None
+    VistRightNumber = None
+    Rasp = 1  # стоимость взятки в распасах
+
+    def __init__(self, name):
+        self.name = str(name)
+
+    def LR(self, VistRightNumber, VistLeftNumber):
+        self.VistRightNumber = VistRightNumber
+        self.VistLeftNumber = VistLeftNumber
+
+    def results(self):
+        print('Пуля:', self.pulya)
+        print('Гора:', self.gora)
+        print('Висты на игрока справа:',self.VistRight)
+        print('Висты на игрока слева:',self.VistLeft)
+
+    def game(self, plStart, plEnd, crown):
+        if classlist[crown].pulya < WinScore:
+            if plStart == 0:
+                if plEnd == 0:
+                    classlist[crown].pulya += 10
+                else:
+                    classlist[crown].gora += 10*plEnd
+            else:
+                if plEnd >= plStart:
+                    classlist[crown].pulya += GamesValue[plStart]
+                else:
+                    classlist[crown].gora += int((plStart - plEnd)*GamesValue[plStart])
+
+        if classlist[crown].pulya <= WinScore:
+            pass
+        else:
+            difference = int(classlist[crown].pulya - WinScore)
+            classlist[crown].pulya = WinScore
+            print("Кому записываем очки? ( 1 для игрока слева \ 2 для игрока справа)")
+            word = input()
+            if word == "1":
+                classlist[self.VistLeftNumber].pulya += difference
+                classlist[self.VistLeftNumber].gora += int(difference * 10)
+                if classlist[self.VistLeftNumber].pulya <= WinScore:
+                    pass
+                else:
+                    difference = int(classlist[self.VistLeftNumber].pulya - WinScore)
+                    classlist[self.VistLeftNumber].pulya = WinScore
+                    classlist[self.VistLeftNumber].gora -= int(difference * 10)
+                    classlist[self.VistRightNumber].pulya += difference
+                    classlist[self.VistRightNumber].gora += int(difference * 10)
+            else:
+                classlist[self.VistRightNumber].pulya += difference
+                classlist[self.VistRightNumber].gora += int(difference * 10)
+                if classlist[self.VistRightNumber].pulya <= WinScore:
+                    pass
+                else:
+                    difference = int(classlist[self.VistRightNumber].pulya - WinScore)
+                    classlist[self.VistRightNumber].pulya = WinScore
+                    classlist[self.VistRightNumber].gora -= int(difference * 10)
+                    classlist[self.VistLeftNumber].pulya += difference
+                    classlist[self.VistLeftNumber].gora += int(difference * 10)
+
+    def raspasi(self, pl):
+        m = pl * self.Rasp
+        self.Rasp += 1
+        if m != 0:
+            self.gora += m
+        else:
+            self.pulya += 2 # +2 в пулю если на распасах ни одной взятки
+
+    def checkscores (self, WinScore):
+        if self.pulya > WinScore:
+            i = int(self.pulya - WinScore)
+            self.pulya -= i
+            self.gora -= i * 10
+        else:
+            pass
+
+     # висты
+    def FinVists(self):
+        self.VistLeft += classlist[self.VistLeftNumber].gora
+        self.VistRight += classlist[self.VistRightNumber].gora
+
+    #Финал
+    def FinScore(self, i):
+        left = self.VistLeft - classlist[self.VistLeftNumber].VistRight
+        right = self.VistRight - classlist[self.VistRightNumber].VistLeft
+        print("Финальный счёт игрока №", i,":", '\n', left + right)
+
+# Заполнение имён и массива игроками
+num = 0
+while num != 3:
+    print('Введите имя игрока:')
+    Name = input("")
+    Person = Player(Name)
+    classlist.append(Person)
+    num += 1
+classlist[1].LR(2, 3)
+classlist[2].LR(3, 1)
+classlist[3].LR(1, 2)
+print('До скольки очков играем?')
+WinScore = int(input())
+print("Отлично начинаем игру!")
+
+
+#выбор варианта игры и играющего
+while int(classlist[1].pulya + classlist[2].pulya + classlist[3].pulya) < int(WinScore * 3):
+    crown = int(input("Кто играет в этой партии? (введите '0' для распасов и '9' для того чтобы увидеть текущий результат.)"))
+    if crown == 9:
+        print("Текущий результат 1го игрока:")
+        classlist[1].results()
+        print("Текущий результат 2го игрока:")
+        classlist[2].results()
+        print("Текущий результат 3го игрока:")
+        classlist[3].results()
+
+#игра
+
+    elif crown != 0:
+        print('Сколько взяток собирается взять игрок №', crown,'?')
+        plStart = int(input())
+        print('Сколько взяток забрал игрок №', crown,'?')
+        plEnd = int(input())
+        classlist[crown].game(plStart, plEnd, crown)
+
+        # Висты
+
+        m2, z2, m3, z3 = 0, 0, 0, 0
+        print('игрок №', classlist[crown].VistRightNumber, 'вист или пас: v\p ?')
+        pl2 = input('')
+        print('игрок №', classlist[crown].VistLeftNumber, 'вист или пас: v\p ?')
+        pl3 = input('')
+
+        if pl2 and pl3 == 'v':
+            m2 = int(classlist[crown].VistRightNumber)
+            print("Сколько взяток взял игрок №", m2, "?")
+            z2 = int(input())
+            m3 = int(classlist[crown].VistLeftNumber)
+            print("Сколько взяток взял игрок №", m3, "?")
+            z3 = int(input())
+            if z2 + z3 == GamesVist[plStart]: #необходимое кол-во вистов
+                classlist[m2].VistLeft += int(z2 * int(GamesValue[plStart]))
+                classlist[m3].VistRight += int(z3 * int(GamesValue[plStart]))
+            elif z2 + z3 > GamesVist[plStart]: #консоляция
+                i = plStart - (z2 + z3)
+                classlist[m2].VistLeft += int(z2 * int(GamesValue[plStart]) +GamesValue[plStart])
+                classlist[m3].VistRight += int(z3 * int(GamesValue[plStart]) +GamesValue[plStart])
+            elif z2 + z3 < GamesVist[plStart]: #недобор вистов
+                classlist[m2].VistLeft += int(z2 * int(GamesValue[plStart]))
+                if (z2 - GamesVistTakes[plStart]) >= 0:
+                    pass
+                else:
+                    classlist[m2].gora += abs(GamesVistTakes[plStart] - z2) * GamesValue[plStart]
+                classlist[m3].VistRight += int(z3 * int(GamesValue[plStart]))
+                if (z3 - GamesVistTakes[plStart]) >= 0:
+                    pass
+                else:
+                    classlist[m3].gora += abs(GamesVistTakes[plStart] - z3) * GamesValue[plStart]
+
+
+
+        elif pl2 == 'v' and pl3 == 'p':
+            m2 = int(classlist[crown].VistRightNumber)
+            print("Сколько взяток взял игрок №", m2, "?")
+            z2 = int(input())
+            if z2 == GamesVist[plStart]: #необходимое кол-во вистов
+                classlist[m2].VistLeft += int(z2 * int(GamesValue[plStart]))
+            elif z2 > GamesVist[plStart]: #консоляция
+                i = plStart - (z2)
+                classlist[m2].VistLeft += int (z2 * int(GamesValue[plStart]) + GamesValue[plStart])
+            elif z2 < GamesVist[plStart]: #недобор вистов
+                classlist[m2].VistLeft += int (z2 * int(GamesValue[plStart]))
+                if (z2 - GamesVistTakes[plStart]) >= 0:
+                    pass
+                else:
+                    classlist[m2].gora += abs(GamesVistTakes[plStart] - z2) * GamesValue[plStart]
+
+
+        elif pl2 == 'p' and pl3 == 'v':
+            m3 = int(classlist[crown].VistRightNumber)
+            print("Сколько взяток взял игрок №", m2, "?")
+            z3 = int(input())
+            if z3 == GamesVist[plStart]:  # необходимое кол-во вистов
+                classlist[m2].VistLeft += int(z3 * int(GamesValue[plStart]))
+            elif z3 > GamesVist[plStart]:  # консоляция
+                i = plStart - (z3)
+                classlist[m2].VistLeft += int(z3 * int(GamesValue[plStart]) + GamesValue[plStart])
+            elif z3 < GamesVist[plStart]:  # недобор вистов
+                classlist[m2].VistLeft += int(z3 * int(GamesValue[plStart]))
+                if (z3 - GamesVistTakes[plStart]) >= 0:
+                    pass
+                else:
+                    classlist[m2].gora += abs(GamesVistTakes[plStart] - z3) * GamesValue[plStart]
+
+
+
+        elif pl2 == 'p' and pl3 == 'p':
+            pass
+
+#распасы
+    elif crown == 0:
+        pl1 = int(input('введите кол-во взяток 1го игрока'))
+        classlist[1].raspasi(pl1)
+        pl2 = int(input('введите кол-во взяток 2го игрока'))
+        classlist[2].raspasi(pl2)
+        pl3 = int(input('введите кол-во взяток 3го игрока'))
+        classlist[3].raspasi(pl3)
+
+#Проверка очков при переходе за границу
+classlist[1].checkscores(WinScore)
+classlist[2].checkscores(WinScore)
+classlist[3].checkscores(WinScore)
+
+#Результаты игры
+print("Результат 1го игрока:")
+classlist[1].results()
+print("Результат 2го игрока:")
+classlist[2].results()
+print("Результат 3го игрока:")
+classlist[3].results()
+
+#подсчёт итоговых очков
+Final = sorted([classlist[1].gora,classlist[2].gora,classlist[3].gora])
+a = Final[0]
+
+#гора
+i = 1
+while i < 4:
+    classlist[i].gora -= a
+    classlist[i].gora *= 10
+    classlist[i].gora //= 3
+    i += 1
+#висты
+i = 1
+while i < 4:
+    classlist[i].FinVists()
+    i += 1
+#Финал
+i = 1
+while i < 4:
+    classlist[i].FinScore(i)
+    i += 1
+
+print("End of the programme.")
